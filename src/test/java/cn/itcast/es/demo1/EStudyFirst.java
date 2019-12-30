@@ -29,8 +29,13 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -450,65 +455,6 @@ public class EStudyFirst {
     }
 
 //-----------------------------------------------------------------------------todo java api 高级操作
-    @Test
-    public void groupAndCount() {
-        //1：构建查询提交
-        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
-        //2：指定聚合条件
-        TermsAggregationBuilder team = AggregationBuilders.terms("player_count").field("team");
-        //3:将聚合条件放入查询条件中
-        builder.addAggregation(team);
-        //4:执行action，返回searchResponse
-        SearchResponse searchResponse = builder.get();
-        Aggregations aggregations = searchResponse.getAggregations();
-        for (Aggregation aggregation : aggregations) {
-            StringTerms stringTerms = (StringTerms) aggregation;
-            List<StringTerms.Bucket> buckets = stringTerms.getBuckets();
-            for (StringTerms.Bucket bucket : buckets) {
-                System.out.println(bucket.getKey());
-                System.out.println(bucket.getDocCount());
-            }
-        }
-    }
-
-
-    @Test
-    public void teamAndPosition(){
-        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
-        TermsAggregationBuilder team = AggregationBuilders.terms("player_count").field("team");
-        TermsAggregationBuilder position = AggregationBuilders.terms("posititon_count").field("position");
-        team.subAggregation(position);
-        SearchResponse searchResponse = builder.addAggregation(team).addAggregation(position).get();
-        Aggregations aggregations =
-                searchResponse.getAggregations();
-        for (Aggregation aggregation : aggregations) {
-            // System.out.println(aggregation.toString());
-            StringTerms stringTerms = (StringTerms) aggregation;
-            List<StringTerms.Bucket> buckets = stringTerms.getBuckets();
-            for (StringTerms.Bucket bucket : buckets) {
-                long docCount = bucket.getDocCount();
-                Object key = bucket.getKey();
-                System.out.println("当前队伍名称为" +  key + "该队伍下有"+docCount + "个球员");
-
-                Aggregation posititon_count = bucket.getAggregations().get("posititon_count");
-                if(null != posititon_count){
-                    StringTerms positionTrem = (StringTerms) posititon_count;
-                    List<StringTerms.Bucket> buckets1 = positionTrem.getBuckets();
-                    for (StringTerms.Bucket bucket1 : buckets1) {
-                        Object key1 = bucket1.getKey();
-                        long docCount1 = bucket1.getDocCount();
-                        System.out.println("该队伍下面的位置为" +  key1+"该位置下有" +  docCount1 +"人");
-                    }
-                }
-            }
-        }
-    }
-
-
-
-
-
-
 
     /**
      * 批量添加数据
@@ -651,6 +597,180 @@ public class EStudyFirst {
         );
         BulkResponse bulkResponse = bulkRequest.get();
         client.close();
+    }
+    @Test
+    public void groupAndCount() {
+        //1：构建查询提交
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+        //2：指定聚合条件
+        TermsAggregationBuilder team = AggregationBuilders.terms("player_count").field("team");
+        //3:将聚合条件放入查询条件中
+        builder.addAggregation(team);
+        //4:执行action，返回searchResponse
+        SearchResponse searchResponse = builder.get();
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms stringTerms = (StringTerms) aggregation;
+            List<StringTerms.Bucket> buckets = stringTerms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                System.out.println(bucket.getKey());
+                System.out.println(bucket.getDocCount());
+            }
+        }
+    }
+
+    /**
+     * 统计每个球队中每个位置的球员数量
+     */
+    @Test
+    public void teamAndPosition(){
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+        TermsAggregationBuilder team = AggregationBuilders.terms("player_count").field("team");
+        TermsAggregationBuilder position = AggregationBuilders.terms("posititon_count").field("position");
+        team.subAggregation(position);
+        SearchResponse searchResponse = builder.addAggregation(team).addAggregation(position).get();
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            // System.out.println(aggregation.toString());
+            StringTerms stringTerms = (StringTerms) aggregation;
+            List<StringTerms.Bucket> buckets = stringTerms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                long docCount = bucket.getDocCount();
+                Object key = bucket.getKey();
+                System.out.println("当前队伍名称为" +  key + "该队伍下有"+docCount + "个球员");
+
+                Aggregation posititon_count = bucket.getAggregations().get("posititon_count");
+                if(null != posititon_count){
+                    StringTerms positionTrem = (StringTerms) posititon_count;
+                    List<StringTerms.Bucket> buckets1 = positionTrem.getBuckets();
+                    for (StringTerms.Bucket bucket1 : buckets1) {
+                        Object key1 = bucket1.getKey();
+                        long docCount1 = bucket1.getDocCount();
+                        System.out.println("该队伍下面的位置为" +  key1+"该位置下有" +  docCount1 +"人");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 计算每个球队年龄最大值
+     */
+    @Test
+    public  void groupAndMax(){
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+        TermsAggregationBuilder team = AggregationBuilders.terms("team_group").field("team");
+
+        MaxAggregationBuilder age = AggregationBuilders.max("max_age").field("age");
+
+        team.subAggregation(age);
+        SearchResponse searchResponse = builder.addAggregation(team).get();
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            StringTerms stringTerms = (StringTerms) aggregation;
+            List<StringTerms.Bucket> buckets = stringTerms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                Aggregation max_age = bucket.getAggregations().get("max_age");
+                System.out.println(max_age.toString());
+            }
+        }
+    }
+
+
+//统计每个球队中年龄最小值
+
+    @Test
+    public  void  teamMinAge(){
+
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+
+        TermsAggregationBuilder team = AggregationBuilders.terms("team_count").field("team");
+
+        MinAggregationBuilder age = AggregationBuilders.min("min_age").field("age");
+
+        TermsAggregationBuilder termAggregation = team.subAggregation(age);
+
+        SearchResponse searchResponse = builder.addAggregation(termAggregation).get();
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            System.out.println(aggregation.toString());
+
+            StringTerms stringTerms = (StringTerms) aggregation;
+            List<StringTerms.Bucket> buckets = stringTerms.getBuckets();
+            for (StringTerms.Bucket bucket : buckets) {
+                Aggregations aggregations1 = bucket.getAggregations();
+                for (Aggregation aggregation1 : aggregations1) {
+                    System.out.println(aggregation1.toString());
+                }
+            }
+        }
+    }
+    /**
+     * 计算每个球队的年龄平均值
+     */
+    @Test
+    public void avgTeamAge(){
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+
+        TermsAggregationBuilder team_field = AggregationBuilders.terms("player_count").field("team");
+
+        AvgAggregationBuilder age_avg = AggregationBuilders.avg("age_avg").field("age");
+
+        team_field.subAggregation(age_avg);
+
+        SearchResponse searchResponse = builder.addAggregation(team_field).get();
+
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            System.out.println(aggregation.toString());
+            StringTerms stringTerms = (StringTerms) aggregation;
+        }
+
+    }
+
+    /**
+     * 统计每个球队当中的球员平均年龄，以及队员总年薪
+     */
+    @Test
+    public void avgAndSum(){
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+
+        TermsAggregationBuilder team_group = AggregationBuilders.terms("team_group").field("team");
+
+        AvgAggregationBuilder avg_age = AggregationBuilders.avg("avg_age").field("age");
+
+        SumAggregationBuilder sumMoney = AggregationBuilders.sum("sum_money").field("salary");
+
+
+        TermsAggregationBuilder termsAggregationBuilder = team_group.subAggregation(avg_age).subAggregation(sumMoney);
+
+        SearchResponse searchResponse = builder.addAggregation(termsAggregationBuilder).get();
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            System.out.println(aggregation.toString());
+        }
+
+
+    }
+
+    /**
+     * 计算每个球队总年薪，并按照年薪进行排序
+     *     select team, sum(salary) as total_salary from player group by team order by total_salary desc;
+     */
+    @Test
+    public void orderBySum(){
+        SearchRequestBuilder builder = client.prepareSearch("player").setTypes("player");
+        TermsAggregationBuilder teamGroup = AggregationBuilders.terms("team_group").field("team").order(BucketOrder.count(true));
+        SumAggregationBuilder sumSalary = AggregationBuilders.sum("sum_salary").field("salary");
+        TermsAggregationBuilder termsAggregationBuilder = teamGroup.subAggregation(sumSalary);
+        SearchResponse searchResponse = builder.addAggregation(termsAggregationBuilder).get();
+
+        Map<String, Aggregation> stringAggregationMap = searchResponse.getAggregations().asMap();
+        System.out.println(stringAggregationMap.toString());
+        Aggregations aggregations = searchResponse.getAggregations();
+        for (Aggregation aggregation : aggregations) {
+            System.out.println(aggregation.toString());
+        }
     }
     @AfterTest
     public void closeClient(){

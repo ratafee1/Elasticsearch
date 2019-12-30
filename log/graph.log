@@ -1,6 +1,6 @@
-2019.12.30 03:04:42  INFO org.elasticsearch.plugins.PluginsService logPluginInfo no modules loaded
-2019.12.30 03:04:42  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.index.reindex.ReindexPlugin]
-2019.12.30 03:04:42  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.join.ParentJoinPlugin]
-2019.12.30 03:04:42  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.percolator.PercolatorPlugin]
-2019.12.30 03:04:42  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.script.mustache.MustachePlugin]
-2019.12.30 03:04:42  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.transport.Netty4Plugin]
+2019.12.31 02:11:26  INFO org.elasticsearch.plugins.PluginsService logPluginInfo no modules loaded
+2019.12.31 02:11:26  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.index.reindex.ReindexPlugin]
+2019.12.31 02:11:26  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.join.ParentJoinPlugin]
+2019.12.31 02:11:26  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.percolator.PercolatorPlugin]
+2019.12.31 02:11:26  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.script.mustache.MustachePlugin]
+2019.12.31 02:11:26  INFO org.elasticsearch.plugins.PluginsService logPluginInfo loaded plugin [org.elasticsearch.transport.Netty4Plugin]
