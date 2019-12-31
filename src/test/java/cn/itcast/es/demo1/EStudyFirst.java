@@ -46,6 +46,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -771,6 +773,26 @@ public class EStudyFirst {
         for (Aggregation aggregation : aggregations) {
             System.out.println(aggregation.toString());
         }
+    }
+
+    @Test
+    public void esJdbc() throws SQLException {
+        EsDataSource dataSource = new EsDataSource();
+        String address = "jdbc:es://http://node01:9200" ;
+        dataSource.setUrl(address);
+        Properties connectionProperties = new Properties();
+        dataSource.setProperties(connectionProperties);
+        Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from library");
+        while(resultSet.next()){
+            String string = resultSet.getString(0);
+            String string1 = resultSet.getString(1);
+            int anInt = resultSet.getInt(2);
+            String string2 = resultSet.getString(4);
+            System.out.println(string + "\t" +  string1 + "\t" +  anInt + "\t" + string2);
+        }
+        connection.close();
     }
     @AfterTest
     public void closeClient(){
